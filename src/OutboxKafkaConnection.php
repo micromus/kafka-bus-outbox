@@ -8,8 +8,8 @@ use Micromus\KafkaBus\Interfaces\Connections\ConnectionRegistryInterface;
 use Micromus\KafkaBus\Interfaces\Consumers\ConsumerInterface;
 use Micromus\KafkaBus\Interfaces\Producers\ProducerInterface;
 use Micromus\KafkaBus\Producers\Configuration as ProducerConfiguration;
+use Micromus\KafkaBus\Uuid\UuidGeneratorInterface;
 use Micromus\KafkaBusOutbox\Interfaces\ProducerMessageRepositoryInterface;
-use Micromus\KafkaBusOutbox\Interfaces\UuidGeneratorInterface;
 
 class OutboxKafkaConnection implements ConnectionInterface
 {

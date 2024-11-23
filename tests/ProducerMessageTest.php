@@ -14,11 +14,11 @@ use Micromus\KafkaBus\Testing\Connections\ConnectionFaker;
 use Micromus\KafkaBus\Testing\Messages\ProducerMessageFaker;
 use Micromus\KafkaBus\Topics\Topic;
 use Micromus\KafkaBus\Topics\TopicRegistry;
+use Micromus\KafkaBus\Uuid\RandomUuidGenerator;
 use Micromus\KafkaBusOutbox\OutboxKafkaConnection;
 use Micromus\KafkaBusOutbox\Publishers\Producers\ProducerManager;
 use Micromus\KafkaBusOutbox\Publishers\Publisher;
 use Micromus\KafkaBusOutbox\Testing\ArrayProducerMessageRepository;
-use Micromus\KafkaBusOutbox\Uuid\RandomUuidGenerator;
 
 it('can produce message', function () {
     $topicRegistry = (new TopicRegistry())

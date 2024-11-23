@@ -4,8 +4,8 @@ namespace Micromus\KafkaBusOutbox;
 
 use Micromus\KafkaBus\Interfaces\Producers\ProducerInterface;
 use Micromus\KafkaBus\Producers\Messages\ProducerMessage;
+use Micromus\KafkaBus\Uuid\UuidGeneratorInterface;
 use Micromus\KafkaBusOutbox\Interfaces\ProducerMessageRepositoryInterface;
-use Micromus\KafkaBusOutbox\Interfaces\UuidGeneratorInterface;
 use Micromus\KafkaBusOutbox\Messages\OutboxProducerMessage;
 
 class OutboxProducer implements ProducerInterface

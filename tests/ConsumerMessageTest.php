@@ -13,9 +13,9 @@ use Micromus\KafkaBus\Testing\Connections\ConnectionFaker;
 use Micromus\KafkaBus\Testing\Messages\VoidConsumerHandlerFaker;
 use Micromus\KafkaBus\Topics\Topic;
 use Micromus\KafkaBus\Topics\TopicRegistry;
+use Micromus\KafkaBus\Uuid\RandomUuidGenerator;
 use Micromus\KafkaBusOutbox\OutboxKafkaConnection;
 use Micromus\KafkaBusOutbox\Testing\ArrayProducerMessageRepository;
-use Micromus\KafkaBusOutbox\Uuid\RandomUuidGenerator;
 use RdKafka\Message;
 
 it('can consume messages', function () {
