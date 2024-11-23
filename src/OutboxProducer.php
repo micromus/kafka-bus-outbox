@@ -3,7 +3,6 @@
 namespace Micromus\KafkaBusOutbox;
 
 use Micromus\KafkaBus\Interfaces\Producers\ProducerInterface;
-use Micromus\KafkaBus\Producers\Configuration;
 use Micromus\KafkaBus\Producers\Messages\ProducerMessage;
 use Micromus\KafkaBusOutbox\Interfaces\ProducerMessageRepositoryInterface;
 use Micromus\KafkaBusOutbox\Interfaces\UuidGeneratorInterface;
@@ -23,10 +22,10 @@ class OutboxProducer implements ProducerInterface
     public function produce(array $messages): void
     {
         $this->producerMessageRepository
-            ->save(array_map(fn (ProducerMessage $message) => $this->map($message), $messages));
+            ->save(array_map($this->mapProducerMessage(...), $messages));
     }
 
-    private function map(ProducerMessage $producerMessage): OutboxProducerMessage
+    private function mapProducerMessage(ProducerMessage $producerMessage): OutboxProducerMessage
     {
         return new OutboxProducerMessage(
             id: $this->uuidGenerator->generate()->toString(),
