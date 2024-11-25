@@ -21,15 +21,11 @@ class Publisher
 
     public function publish(): bool
     {
-        $outboxProducerMessages = $this->producerMessageRepository
-            ->get($this->limit);
+        $groupedOutboxMessages = $this->getOutboxProducerMessages();
 
-        if (count($outboxProducerMessages) === 0) {
+        if (count($groupedOutboxMessages) === 0) {
             return false;
         }
-
-        $groupedOutboxMessages = $this->messageGrouper
-            ->group($outboxProducerMessages);
 
         foreach ($groupedOutboxMessages as $connectionName => $topics) {
             foreach ($topics as $topicName => $topicConfiguration) {
@@ -41,6 +37,22 @@ class Publisher
         }
 
         return true;
+    }
+
+    /**
+     * @return array<string, array<string, array{options: array, messages: OutboxProducerMessage[]}>>
+     */
+    private function getOutboxProducerMessages(): array
+    {
+        $outboxProducerMessages = $this->producerMessageRepository
+            ->get($this->limit);
+
+        if (count($outboxProducerMessages) === 0) {
+            return [];
+        }
+
+        return $this->messageGrouper
+            ->group($outboxProducerMessages);
     }
 
     /**
