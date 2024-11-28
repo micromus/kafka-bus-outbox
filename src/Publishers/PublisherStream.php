@@ -2,22 +2,34 @@
 
 namespace Micromus\KafkaBusOutbox\Publishers;
 
+use Micromus\KafkaBusOutbox\Interfaces\ProducerMessageRepositoryInterface;
+
 class PublisherStream
 {
     protected bool $forceStop = false;
 
     public function __construct(
         protected Publisher $publisher,
-        protected int $timeToSleep = 60
+        protected ProducerMessageRepositoryInterface $producerMessageRepository,
+        protected int $timeToSleep = 60,
+        protected int $limit = 100
     ) {
     }
 
     public function handle(): void
     {
         do {
-            $this->publisher->publish();
+            $messages = $this->producerMessageRepository
+                ->get($this->limit);
 
-            sleep($this->timeToSleep);
+            if (count($messages) === 0) {
+                sleep($this->timeToSleep);
+
+                continue;
+            }
+
+            $this->publisher
+                ->publish($messages);
         }
         while (!$this->forceStop);
     }

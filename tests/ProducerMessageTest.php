@@ -93,7 +93,7 @@ it('can produce message', function () {
         ->toHaveProperty('partition', 5);
 
     $publisher = new Publisher($producerMessageRepository, new ProducerManager($connectionRegistry));
-    $publisher->publish();
+    $publisher->publish($producerMessageRepository->get());
 
     expect($producerMessageRepository->outboxProducerMessages)
         ->toBeEmpty()

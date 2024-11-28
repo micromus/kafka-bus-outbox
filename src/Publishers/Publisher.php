@@ -14,18 +14,18 @@ class Publisher
     public function __construct(
         protected ProducerMessageRepositoryInterface $producerMessageRepository,
         protected ProducerManager $producerManager,
-        protected int $limit = 100
     ) {
         $this->messageGrouper = new MessageGrouper();
     }
 
-    public function publish(): bool
+    /**
+     * @param OutboxProducerMessage[] $outboxProducerMessages
+     * @return void
+     */
+    public function publish(array $outboxProducerMessages): void
     {
-        $groupedOutboxMessages = $this->getOutboxProducerMessages();
-
-        if (count($groupedOutboxMessages) === 0) {
-            return false;
-        }
+        $groupedOutboxMessages = $this->messageGrouper
+            ->group($outboxProducerMessages);
 
         foreach ($groupedOutboxMessages as $connectionName => $topics) {
             foreach ($topics as $topicName => $topicConfiguration) {
@@ -35,24 +35,6 @@ class Publisher
                 $this->publishMessages($producer, $topicConfiguration['messages']);
             }
         }
-
-        return true;
-    }
-
-    /**
-     * @return array<string, array<string, array{options: array, messages: OutboxProducerMessage[]}>>
-     */
-    private function getOutboxProducerMessages(): array
-    {
-        $outboxProducerMessages = $this->producerMessageRepository
-            ->get($this->limit);
-
-        if (count($outboxProducerMessages) === 0) {
-            return [];
-        }
-
-        return $this->messageGrouper
-            ->group($outboxProducerMessages);
     }
 
     /**
