@@ -4,10 +4,11 @@ namespace Micromus\KafkaBusOutbox\Publishers;
 
 use Micromus\KafkaBus\Interfaces\Producers\ProducerInterface;
 use Micromus\KafkaBusOutbox\Interfaces\ProducerMessageRepositoryInterface;
+use Micromus\KafkaBusOutbox\Interfaces\Publishers\PublisherInterface;
 use Micromus\KafkaBusOutbox\Messages\OutboxProducerMessage;
 use Micromus\KafkaBusOutbox\Publishers\Producers\ProducerManager;
 
-class Publisher
+class Publisher implements PublisherInterface
 {
     protected MessageGrouper $messageGrouper;
 
@@ -19,13 +20,13 @@ class Publisher
     }
 
     /**
-     * @param OutboxProducerMessage[] $outboxProducerMessages
+     * @param OutboxProducerMessage[] $messages
      * @return void
      */
-    public function publish(array $outboxProducerMessages): void
+    public function publish(array $messages): void
     {
         $groupedOutboxMessages = $this->messageGrouper
-            ->group($outboxProducerMessages);
+            ->group($messages);
 
         foreach ($groupedOutboxMessages as $connectionName => $topics) {
             foreach ($topics as $topicName => $topicConfiguration) {

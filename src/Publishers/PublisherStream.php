@@ -3,20 +3,27 @@
 namespace Micromus\KafkaBusOutbox\Publishers;
 
 use Micromus\KafkaBusOutbox\Interfaces\ProducerMessageRepositoryInterface;
+use Micromus\KafkaBusOutbox\Interfaces\Publishers\PublisherInterface;
+use Micromus\KafkaBusOutbox\Interfaces\Publishers\PublisherStreamInterface;
 
-class PublisherStream
+class PublisherStream implements PublisherStreamInterface
 {
     protected bool $forceStop = false;
 
     public function __construct(
-        protected Publisher $publisher,
+        protected PublisherInterface $publisher,
         protected ProducerMessageRepositoryInterface $producerMessageRepository,
         protected int $timeToSleep = 60,
         protected int $limit = 100
     ) {
     }
 
-    public function handle(): void
+    public function forceStop(): void
+    {
+        $this->forceStop = true;
+    }
+
+    public function process(): void
     {
         do {
             $messages = $this->producerMessageRepository
@@ -32,10 +39,5 @@ class PublisherStream
                 ->publish($messages);
         }
         while (!$this->forceStop);
-    }
-
-    public function forceStop(): void
-    {
-        $this->forceStop = true;
     }
 }
