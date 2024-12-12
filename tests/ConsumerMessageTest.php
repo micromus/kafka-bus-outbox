@@ -6,17 +6,17 @@ use Micromus\KafkaBus\Connections\Registry\DriverRegistry;
 use Micromus\KafkaBus\Consumers\ConsumerStreamFactory;
 use Micromus\KafkaBus\Consumers\Messages\ConsumerMessageHandlerFactory;
 use Micromus\KafkaBus\Consumers\Router\ConsumerRouterFactory;
-use Micromus\KafkaBus\Messages\MessagePipelineFactory;
+use Micromus\KafkaBus\Pipelines\PipelineFactory;
 use Micromus\KafkaBus\Producers\ProducerStreamFactory;
 use Micromus\KafkaBus\Support\Resolvers\NativeResolver;
 use Micromus\KafkaBus\Testing\Connections\ConnectionFaker;
+use Micromus\KafkaBus\Testing\Consumers\MessageBuilder;
 use Micromus\KafkaBus\Testing\Messages\VoidConsumerHandlerFaker;
 use Micromus\KafkaBus\Topics\Topic;
 use Micromus\KafkaBus\Topics\TopicRegistry;
 use Micromus\KafkaBus\Uuid\RandomUuidGenerator;
 use Micromus\KafkaBusOutbox\OutboxKafkaConnection;
 use Micromus\KafkaBusOutbox\Testing\ArrayProducerMessageRepository;
-use RdKafka\Message;
 
 it('can consume messages', function () {
     $topicRegistry = (new TopicRegistry())
@@ -40,12 +40,15 @@ it('can consume messages', function () {
         );
     });
 
-    $message = new Message();
-    $message->payload = 'test-message';
-    $message->headers = ['foo' => 'bar'];
+    $message = MessageBuilder::for($topicRegistry)
+        ->build([
+            'payload' => 'test-message',
+            'topic_name' => 'products',
+            'headers' => ['foo' => 'bar'],
+        ]);
 
     $connectionFaker = new ConnectionFaker($topicRegistry);
-    $connectionFaker->addMessage('products', $message);
+    $connectionFaker->addMessage($message);
 
     $driverRegistry->add('faker', function () use ($connectionFaker) {
         return $connectionFaker;
@@ -64,14 +67,18 @@ it('can consume messages', function () {
         new Bus\ThreadRegistry(
             $connectionRegistry,
             new Bus\Publishers\PublisherFactory(
-                new ProducerStreamFactory(new MessagePipelineFactory(new NativeResolver())),
+                new ProducerStreamFactory(new PipelineFactory(new NativeResolver())),
                 $topicRegistry
             ),
             new Bus\Listeners\ListenerFactory(
                 new ConsumerStreamFactory(
                     new ConsumerMessageHandlerFactory(
-                        new MessagePipelineFactory(new NativeResolver()),
-                        new ConsumerRouterFactory(new NativeResolver(), $topicRegistry)
+                        new PipelineFactory(new NativeResolver()),
+                        new ConsumerRouterFactory(
+                            new NativeResolver(),
+                            new PipelineFactory(new NativeResolver()),
+                            $topicRegistry
+                        )
                     )
                 ),
                 $workerRegistry
@@ -85,7 +92,7 @@ it('can consume messages', function () {
 
     expect($connectionFaker->committedMessages)
         ->toHaveCount(1)
-        ->and($connectionFaker->committedMessages['production.fact.products.1'][0])
+        ->and($connectionFaker->committedMessages['production.fact.products.1'][0]->original())
         ->toHaveProperty('payload', 'test-message')
         ->toHaveProperty('headers', ['foo' => 'bar']);
 });
