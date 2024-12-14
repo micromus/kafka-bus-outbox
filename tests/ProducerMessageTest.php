@@ -81,7 +81,7 @@ it('can produce message', function () {
         'outbox'
     );
 
-    $bus->publish(new ProducerMessageFaker('test-message', ['foo' => 'bar'], 5));
+    $bus->publish([new ProducerMessageFaker('test-message', ['foo' => 'bar'], 5)]);
 
     expect($connectionFaker->publishedMessages)
         ->toBeEmpty()

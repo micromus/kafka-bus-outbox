@@ -47,7 +47,7 @@ it('can consume messages', function () {
             'headers' => ['foo' => 'bar'],
         ]);
 
-    $connectionFaker = new ConnectionFaker($topicRegistry);
+    $connectionFaker = new ConnectionFaker();
     $connectionFaker->addMessage($message);
 
     $driverRegistry->add('faker', function () use ($connectionFaker) {
@@ -87,7 +87,7 @@ it('can consume messages', function () {
         'outbox'
     );
 
-    $bus->listener('default-listener')
+    $bus->createListener('default-listener')
         ->listen();
 
     expect($connectionFaker->committedMessages)
