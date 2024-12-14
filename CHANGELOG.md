@@ -2,6 +2,10 @@
 
 All notable changes to `kafka-bus-outbox` will be documented in this file.
 
+## v0.2.0 - 2024-12-12
+
+**Full Changelog**: https://github.com/micromus/kafka-bus-outbox/compare/v0.1.7...v0.2.0
+
 ## v0.1.7 - 2024-11-29
 
 - [add] Добавлены интерфейсы для Publisher
