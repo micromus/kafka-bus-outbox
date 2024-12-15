@@ -1,17 +1,17 @@
 <?php
 
-namespace Micromus\KafkaBusOutbox\Publishers;
+namespace Micromus\KafkaBusOutbox\Producers;
 
 use Micromus\KafkaBusOutbox\Interfaces\ProducerMessageRepositoryInterface;
-use Micromus\KafkaBusOutbox\Interfaces\Publishers\PublisherInterface;
-use Micromus\KafkaBusOutbox\Interfaces\Publishers\PublisherStreamInterface;
+use Micromus\KafkaBusOutbox\Interfaces\Producers\OutboxProducerInterface;
+use Micromus\KafkaBusOutbox\Interfaces\Producers\OutboxProducerStreamInterface;
 
-class PublisherStream implements PublisherStreamInterface
+class OutboxProducerStream implements OutboxProducerStreamInterface
 {
     protected bool $forceStop = false;
 
     public function __construct(
-        protected PublisherInterface $publisher,
+        protected OutboxProducerInterface $producer,
         protected ProducerMessageRepositoryInterface $producerMessageRepository,
         protected int $timeToSleep = 60,
         protected int $limit = 100
@@ -35,7 +35,7 @@ class PublisherStream implements PublisherStreamInterface
                 continue;
             }
 
-            $this->publisher
+            $this->producer
                 ->publish($messages);
         }
         while (!$this->forceStop);

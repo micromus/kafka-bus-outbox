@@ -1,12 +1,12 @@
 <?php
 
-namespace Micromus\KafkaBusOutbox\Publishers\Producers;
+namespace Micromus\KafkaBusOutbox\Producers;
 
 use Micromus\KafkaBus\Interfaces\Connections\ConnectionInterface;
 use Micromus\KafkaBus\Interfaces\Producers\ProducerInterface;
 use Micromus\KafkaBus\Producers\Configuration;
 
-class ConnectionProducer
+final class Connection
 {
     protected array $producers = [];
 

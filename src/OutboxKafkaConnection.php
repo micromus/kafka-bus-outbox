@@ -8,15 +8,13 @@ use Micromus\KafkaBus\Interfaces\Connections\ConnectionRegistryInterface;
 use Micromus\KafkaBus\Interfaces\Consumers\ConsumerInterface;
 use Micromus\KafkaBus\Interfaces\Producers\ProducerInterface;
 use Micromus\KafkaBus\Producers\Configuration as ProducerConfiguration;
-use Micromus\KafkaBus\Uuid\UuidGeneratorInterface;
 use Micromus\KafkaBusOutbox\Interfaces\ProducerMessageRepositoryInterface;
 
-class OutboxKafkaConnection implements ConnectionInterface
+final class OutboxKafkaConnection implements ConnectionInterface
 {
     public function __construct(
         protected ProducerMessageRepositoryInterface $producerMessageRepository,
         protected ConnectionRegistryInterface $connectionRegistry,
-        protected UuidGeneratorInterface $uuidGenerator,
         protected string $sourceConnectionName,
     ) {
     }
@@ -28,7 +26,6 @@ class OutboxKafkaConnection implements ConnectionInterface
             connectionName: $this->sourceConnectionName,
             additionalOptions: $configuration->additionalOptions,
             producerMessageRepository: $this->producerMessageRepository,
-            uuidGenerator: $this->uuidGenerator,
         );
     }
 

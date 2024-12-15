@@ -14,10 +14,9 @@ use Micromus\KafkaBus\Testing\Connections\ConnectionFaker;
 use Micromus\KafkaBus\Testing\Messages\ProducerMessageFaker;
 use Micromus\KafkaBus\Topics\Topic;
 use Micromus\KafkaBus\Topics\TopicRegistry;
-use Micromus\KafkaBus\Uuid\RandomUuidGenerator;
 use Micromus\KafkaBusOutbox\OutboxKafkaConnection;
-use Micromus\KafkaBusOutbox\Publishers\Producers\ProducerManager;
-use Micromus\KafkaBusOutbox\Publishers\Publisher;
+use Micromus\KafkaBusOutbox\Producers\ProducerManager;
+use Micromus\KafkaBusOutbox\Producers\OutboxProducer;
 use Micromus\KafkaBusOutbox\Testing\ArrayProducerMessageRepository;
 
 it('can produce message', function () {
@@ -37,12 +36,11 @@ it('can produce message', function () {
         return new OutboxKafkaConnection(
             producerMessageRepository: $producerMessageRepository,
             connectionRegistry: $connectionRegistry,
-            uuidGenerator: new RandomUuidGenerator(),
             sourceConnectionName: $options['connection_for']
         );
     });
 
-    $connectionFaker = new ConnectionFaker($topicRegistry);
+    $connectionFaker = new ConnectionFaker();
 
     $driverRegistry->add('faker', function () use ($connectionFaker) {
         return $connectionFaker;
@@ -87,17 +85,17 @@ it('can produce message', function () {
         ->toBeEmpty()
         ->and($producerMessageRepository->outboxProducerMessages)
         ->toHaveCount(1)
-        ->and($producerMessageRepository->outboxProducerMessages[0])
+        ->and($producerMessageRepository->outboxProducerMessages[0]->producerMessage)
         ->toHaveProperty('topicName', 'production.fact.products.1')
         ->toHaveProperty('connectionName', 'kafka')
         ->toHaveProperty('additionalOptions', ['foo' => 'bar'])
-        ->and($producerMessageRepository->outboxProducerMessages[0]->message)
+        ->and($producerMessageRepository->outboxProducerMessages[0]->producerMessage->original)
         ->toHaveProperty('payload', 'test-message')
         ->toHaveProperty('headers', ['foo' => 'bar'])
         ->toHaveProperty('partition', 5);
 
-    $publisher = new Publisher($producerMessageRepository, new ProducerManager($connectionRegistry));
-    $publisher->publish($producerMessageRepository->get());
+    $producer = new OutboxProducer($producerMessageRepository, new ProducerManager($connectionRegistry));
+    $producer->publish($producerMessageRepository->get());
 
     expect($producerMessageRepository->outboxProducerMessages)
         ->toBeEmpty()

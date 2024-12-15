@@ -1,14 +1,13 @@
 <?php
 
-namespace Micromus\KafkaBusOutbox\Publishers;
+namespace Micromus\KafkaBusOutbox\Producers;
 
 use Micromus\KafkaBus\Interfaces\Producers\ProducerInterface;
 use Micromus\KafkaBusOutbox\Interfaces\ProducerMessageRepositoryInterface;
-use Micromus\KafkaBusOutbox\Interfaces\Publishers\PublisherInterface;
-use Micromus\KafkaBusOutbox\Messages\OutboxProducerMessage;
-use Micromus\KafkaBusOutbox\Publishers\Producers\ProducerManager;
+use Micromus\KafkaBusOutbox\Interfaces\Producers\OutboxProducerInterface;
+use Micromus\KafkaBusOutbox\Messages\DeferredOutboxProducerMessage;
 
-class Publisher implements PublisherInterface
+class OutboxProducer implements OutboxProducerInterface
 {
     protected MessageGrouper $messageGrouper;
 
@@ -20,7 +19,7 @@ class Publisher implements PublisherInterface
     }
 
     /**
-     * @param OutboxProducerMessage[] $messages
+     * @param DeferredOutboxProducerMessage[] $messages
      * @return void
      */
     public function publish(array $messages): void
@@ -40,16 +39,24 @@ class Publisher implements PublisherInterface
 
     /**
      * @param ProducerInterface $producer
-     * @param OutboxProducerMessage[] $messages
+     * @param DeferredOutboxProducerMessage[] $messages
      * @return void
      */
     private function publishMessages(ProducerInterface $producer, array $messages): void
     {
-        $producerMessages = array_map(fn (OutboxProducerMessage $message) => $message->message, $messages);
+        $producerMessages = array_map(
+            fn (DeferredOutboxProducerMessage $message) => $message->producerMessage->original,
+            $messages
+        );
 
         $producer->produce($producerMessages);
 
+        $deleteProducerMessageIds = array_map(
+            fn (DeferredOutboxProducerMessage $message) => $message->id,
+            $messages
+        );
+
         $this->producerMessageRepository
-            ->delete(array_map(fn (OutboxProducerMessage $message) => $message->id, $messages));
+            ->delete($deleteProducerMessageIds);
     }
 }

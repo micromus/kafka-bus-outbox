@@ -2,13 +2,14 @@
 
 namespace Micromus\KafkaBusOutbox\Interfaces;
 
+use Micromus\KafkaBusOutbox\Messages\DeferredOutboxProducerMessage;
 use Micromus\KafkaBusOutbox\Messages\OutboxProducerMessage;
 
 interface ProducerMessageRepositoryInterface
 {
     /**
      * @param int $limit
-     * @return OutboxProducerMessage[]
+     * @return DeferredOutboxProducerMessage[]
      */
     public function get(int $limit = 100): array;
 

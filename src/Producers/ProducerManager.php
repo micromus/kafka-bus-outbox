@@ -1,6 +1,6 @@
 <?php
 
-namespace Micromus\KafkaBusOutbox\Publishers\Producers;
+namespace Micromus\KafkaBusOutbox\Producers;
 
 use Micromus\KafkaBus\Interfaces\Connections\ConnectionRegistryInterface;
 use Micromus\KafkaBus\Interfaces\Producers\ProducerInterface;
@@ -8,7 +8,7 @@ use Micromus\KafkaBus\Interfaces\Producers\ProducerInterface;
 class ProducerManager
 {
     /**
-     * @var ConnectionProducer[]
+     * @var Connection[]
      */
     protected array $connections = [];
 
@@ -23,10 +23,10 @@ class ProducerManager
             ->getOrCreateProducer($topicName, $options);
     }
 
-    private function getOrCreateConnectionProducer(string $connectionName): ConnectionProducer
+    private function getOrCreateConnectionProducer(string $connectionName): Connection
     {
         if (!isset($this->connections[$connectionName])) {
-            $this->connections[$connectionName] = new ConnectionProducer(
+            $this->connections[$connectionName] = new Connection(
                 $this->connectionRegistry
                     ->connection($connectionName)
             );

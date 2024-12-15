@@ -14,7 +14,6 @@ use Micromus\KafkaBus\Testing\Consumers\MessageBuilder;
 use Micromus\KafkaBus\Testing\Messages\VoidConsumerHandlerFaker;
 use Micromus\KafkaBus\Topics\Topic;
 use Micromus\KafkaBus\Topics\TopicRegistry;
-use Micromus\KafkaBus\Uuid\RandomUuidGenerator;
 use Micromus\KafkaBusOutbox\OutboxKafkaConnection;
 use Micromus\KafkaBusOutbox\Testing\ArrayProducerMessageRepository;
 
@@ -35,7 +34,6 @@ it('can consume messages', function () {
         return new OutboxKafkaConnection(
             producerMessageRepository: $producerMessageRepository,
             connectionRegistry: $connectionRegistry,
-            uuidGenerator: new RandomUuidGenerator(),
             sourceConnectionName: $options['connection_for']
         );
     });

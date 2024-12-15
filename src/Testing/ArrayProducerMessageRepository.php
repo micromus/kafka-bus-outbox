@@ -3,12 +3,14 @@
 namespace Micromus\KafkaBusOutbox\Testing;
 
 use Micromus\KafkaBusOutbox\Interfaces\ProducerMessageRepositoryInterface;
+use Micromus\KafkaBusOutbox\Messages\DeferredOutboxProducerMessage;
 use Micromus\KafkaBusOutbox\Messages\OutboxProducerMessage;
 
 final class ArrayProducerMessageRepository implements ProducerMessageRepositoryInterface
 {
+    private int $id = 0;
     /**
-     * @param OutboxProducerMessage[] $outboxProducerMessages
+     * @param DeferredOutboxProducerMessage[] $outboxProducerMessages
      */
     public function __construct(
         public array $outboxProducerMessages = [],
@@ -22,14 +24,22 @@ final class ArrayProducerMessageRepository implements ProducerMessageRepositoryI
 
     public function save(array $messages): void
     {
-        $this->outboxProducerMessages += $messages;
+        $this->outboxProducerMessages += array_map($this->mapDeferredOutboxProducerMessage(...), $messages);
     }
 
     public function delete(array $ids): void
     {
         $this->outboxProducerMessages = array_filter(
             $this->outboxProducerMessages,
-            fn (OutboxProducerMessage $message) => !in_array($message->id, $ids)
+            fn (DeferredOutboxProducerMessage $message) => !in_array($message->id, $ids)
+        );
+    }
+
+    private function mapDeferredOutboxProducerMessage(OutboxProducerMessage $message): DeferredOutboxProducerMessage
+    {
+        return new DeferredOutboxProducerMessage(
+            id: (string) $this->id++,
+            producerMessage: $message
         );
     }
 }
