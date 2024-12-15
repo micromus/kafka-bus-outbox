@@ -2,6 +2,10 @@
 
 All notable changes to `kafka-bus-outbox` will be documented in this file.
 
+## v0.3.0 - 2024-12-15
+
+**Full Changelog**: https://github.com/micromus/kafka-bus-outbox/compare/v0.2.1...v0.3.0
+
 ## v0.2.1 - 2024-12-14
 
 **Full Changelog**: https://github.com/micromus/kafka-bus-outbox/compare/v0.2.0...v0.2.1
