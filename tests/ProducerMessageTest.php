@@ -15,8 +15,10 @@ use Micromus\KafkaBus\Testing\Messages\ProducerMessageFaker;
 use Micromus\KafkaBus\Topics\Topic;
 use Micromus\KafkaBus\Topics\TopicRegistry;
 use Micromus\KafkaBusOutbox\OutboxKafkaConnection;
-use Micromus\KafkaBusOutbox\Producers\ProducerManager;
 use Micromus\KafkaBusOutbox\Producers\OutboxProducer;
+use Micromus\KafkaBusOutbox\Producers\OutboxProducerStream;
+use Micromus\KafkaBusOutbox\Producers\ProducerBag;
+use Micromus\KafkaBusOutbox\Savers\ProducerMessageSaverFactory;
 use Micromus\KafkaBusOutbox\Testing\ArrayProducerMessageRepository;
 
 it('can produce message', function () {
@@ -34,7 +36,7 @@ it('can produce message', function () {
 
     $driverRegistry->add('outbox', function (array $options) use ($connectionRegistry, $producerMessageRepository) {
         return new OutboxKafkaConnection(
-            producerMessageRepository: $producerMessageRepository,
+            producerMessageSaverFactory: new ProducerMessageSaverFactory($producerMessageRepository),
             connectionRegistry: $connectionRegistry,
             sourceConnectionName: $options['connection_for']
         );
@@ -94,8 +96,12 @@ it('can produce message', function () {
         ->toHaveProperty('headers', ['foo' => 'bar'])
         ->toHaveProperty('partition', 5);
 
-    $producer = new OutboxProducer($producerMessageRepository, new ProducerManager($connectionRegistry));
-    $producer->publish($producerMessageRepository->get());
+    $producerStream = new OutboxProducerStream(
+        new OutboxProducer(new ProducerBag($connectionRegistry)),
+        $producerMessageRepository
+    );
+
+    $producerStream->process();
 
     expect($producerMessageRepository->outboxProducerMessages)
         ->toBeEmpty()

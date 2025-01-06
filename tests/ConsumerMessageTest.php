@@ -15,6 +15,7 @@ use Micromus\KafkaBus\Testing\Messages\VoidConsumerHandlerFaker;
 use Micromus\KafkaBus\Topics\Topic;
 use Micromus\KafkaBus\Topics\TopicRegistry;
 use Micromus\KafkaBusOutbox\OutboxKafkaConnection;
+use Micromus\KafkaBusOutbox\Savers\ProducerMessageSaverFactory;
 use Micromus\KafkaBusOutbox\Testing\ArrayProducerMessageRepository;
 
 it('can consume messages', function () {
@@ -32,7 +33,7 @@ it('can consume messages', function () {
 
     $driverRegistry->add('outbox', function (array $options) use ($connectionRegistry, $producerMessageRepository) {
         return new OutboxKafkaConnection(
-            producerMessageRepository: $producerMessageRepository,
+            producerMessageSaverFactory: new ProducerMessageSaverFactory($producerMessageRepository),
             connectionRegistry: $connectionRegistry,
             sourceConnectionName: $options['connection_for']
         );

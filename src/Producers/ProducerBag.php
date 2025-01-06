@@ -5,7 +5,7 @@ namespace Micromus\KafkaBusOutbox\Producers;
 use Micromus\KafkaBus\Interfaces\Connections\ConnectionRegistryInterface;
 use Micromus\KafkaBus\Interfaces\Producers\ProducerInterface;
 
-class ProducerManager
+final class ProducerBag
 {
     /**
      * @var Connection[]

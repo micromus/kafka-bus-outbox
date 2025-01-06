@@ -8,12 +8,13 @@ use Micromus\KafkaBus\Interfaces\Connections\ConnectionRegistryInterface;
 use Micromus\KafkaBus\Interfaces\Consumers\ConsumerInterface;
 use Micromus\KafkaBus\Interfaces\Producers\ProducerInterface;
 use Micromus\KafkaBus\Producers\Configuration as ProducerConfiguration;
+use Micromus\KafkaBusOutbox\Interfaces\Savers\ProducerMessageSaverFactoryInterface;
 use Micromus\KafkaBusOutbox\Interfaces\ProducerMessageRepositoryInterface;
 
 final class OutboxKafkaConnection implements ConnectionInterface
 {
     public function __construct(
-        protected ProducerMessageRepositoryInterface $producerMessageRepository,
+        protected ProducerMessageSaverFactoryInterface $producerMessageSaverFactory,
         protected ConnectionRegistryInterface $connectionRegistry,
         protected string $sourceConnectionName,
     ) {
@@ -21,12 +22,10 @@ final class OutboxKafkaConnection implements ConnectionInterface
 
     public function createProducer(string $topicName, ProducerConfiguration $configuration): ProducerInterface
     {
-        return new OutboxProducer(
-            topicName: $topicName,
-            connectionName: $this->sourceConnectionName,
-            additionalOptions: $configuration->additionalOptions,
-            producerMessageRepository: $this->producerMessageRepository,
-        );
+        $messageSaver = $this->producerMessageSaverFactory
+            ->create($this->sourceConnectionName, $topicName, $configuration->additionalOptions);
+
+        return new OutboxProducer($messageSaver);
     }
 
     public function createConsumer(array $topicNames, ConsumerConfiguration $configuration): ConsumerInterface

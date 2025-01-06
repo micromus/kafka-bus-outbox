@@ -3,12 +3,13 @@
 namespace Micromus\KafkaBusOutbox\Interfaces\Producers;
 
 use Micromus\KafkaBusOutbox\Messages\DeferredOutboxProducerMessage;
+use Micromus\KafkaBusOutbox\Producers\Result\OutboxProducerResult;
 
 interface OutboxProducerInterface
 {
     /**
      * @param DeferredOutboxProducerMessage[] $messages
-     * @return void
+     * @return OutboxProducerResult
      */
-    public function publish(array $messages): void;
+    public function publish(array $messages): OutboxProducerResult;
 }

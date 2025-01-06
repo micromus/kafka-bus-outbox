@@ -3,38 +3,54 @@
 namespace Micromus\KafkaBusOutbox\Producers;
 
 use Micromus\KafkaBus\Interfaces\Producers\ProducerInterface;
-use Micromus\KafkaBusOutbox\Interfaces\ProducerMessageRepositoryInterface;
 use Micromus\KafkaBusOutbox\Interfaces\Producers\OutboxProducerInterface;
 use Micromus\KafkaBusOutbox\Messages\DeferredOutboxProducerMessage;
+use Micromus\KafkaBusOutbox\Producers\Result\ErrorOutboxProducerResult;
+use Micromus\KafkaBusOutbox\Producers\Result\OutboxProducerResult;
+use Micromus\KafkaBusOutbox\Producers\Result\SuccessOutboxProducerResult;
+use Micromus\KafkaBusOutbox\Producers\Result\PublishedTopicResult;
+use Throwable;
 
-class OutboxProducer implements OutboxProducerInterface
+final class OutboxProducer implements OutboxProducerInterface
 {
     protected MessageGrouper $messageGrouper;
 
     public function __construct(
-        protected ProducerMessageRepositoryInterface $producerMessageRepository,
-        protected ProducerManager $producerManager,
+        protected ProducerBag $producerBag,
     ) {
         $this->messageGrouper = new MessageGrouper();
     }
 
     /**
      * @param DeferredOutboxProducerMessage[] $messages
-     * @return void
+     * @return OutboxProducerResult
      */
-    public function publish(array $messages): void
+    public function publish(array $messages): OutboxProducerResult
     {
         $groupedOutboxMessages = $this->messageGrouper
             ->group($messages);
 
+        $published = [];
+
         foreach ($groupedOutboxMessages as $connectionName => $topics) {
             foreach ($topics as $topicName => $topicConfiguration) {
-                $producer = $this->producerManager
-                    ->getOrCreateProducer($connectionName, $topicName, $topicConfiguration['options']);
+                $messageIds = array_map(fn (DeferredOutboxProducerMessage $message) => $message->id, $messages);
 
-                $this->publishMessages($producer, $topicConfiguration['messages']);
+                try {
+                    $producer = $this->producerBag
+                        ->getOrCreateProducer($connectionName, $topicName, $topicConfiguration['options']);
+
+                    $this->publishMessages($producer, $topicConfiguration['messages']);
+
+                    $published[] = new PublishedTopicResult($topicName, $messageIds);
+                }
+                catch (Throwable $exception) {
+                    return new ErrorOutboxProducerResult($topicName, $exception, $published, $messageIds);
+                }
             }
         }
+
+        return new SuccessOutboxProducerResult($published);
     }
 
     /**
@@ -50,13 +66,5 @@ class OutboxProducer implements OutboxProducerInterface
         );
 
         $producer->produce($producerMessages);
-
-        $deleteProducerMessageIds = array_map(
-            fn (DeferredOutboxProducerMessage $message) => $message->id,
-            $messages
-        );
-
-        $this->producerMessageRepository
-            ->delete($deleteProducerMessageIds);
     }
 }

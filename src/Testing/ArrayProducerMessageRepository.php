@@ -5,6 +5,7 @@ namespace Micromus\KafkaBusOutbox\Testing;
 use Micromus\KafkaBusOutbox\Interfaces\ProducerMessageRepositoryInterface;
 use Micromus\KafkaBusOutbox\Messages\DeferredOutboxProducerMessage;
 use Micromus\KafkaBusOutbox\Messages\OutboxProducerMessage;
+use Micromus\KafkaBusOutbox\Testing\Exceptions\OutboxProducerMessagesEndedException;
 
 final class ArrayProducerMessageRepository implements ProducerMessageRepositoryInterface
 {
@@ -17,9 +18,21 @@ final class ArrayProducerMessageRepository implements ProducerMessageRepositoryI
     ) {
     }
 
+    /**
+     * @param int $limit
+     * @return DeferredOutboxProducerMessage[]
+     *
+     * @throws OutboxProducerMessagesEndedException
+     */
     public function get(int $limit = 100): array
     {
-        return array_slice($this->outboxProducerMessages, 0, $limit);
+        $messages = array_slice($this->outboxProducerMessages, 0, $limit);
+
+        if (count($messages) == 0) {
+            throw new OutboxProducerMessagesEndedException();
+        }
+
+        return $messages;
     }
 
     public function save(array $messages): void
