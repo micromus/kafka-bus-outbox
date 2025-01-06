@@ -20,6 +20,7 @@ use Micromus\KafkaBusOutbox\Producers\OutboxProducerStream;
 use Micromus\KafkaBusOutbox\Producers\ProducerBag;
 use Micromus\KafkaBusOutbox\Savers\ProducerMessageSaverFactory;
 use Micromus\KafkaBusOutbox\Testing\ArrayProducerMessageRepository;
+use function PHPUnit\Framework\once;
 
 it('can produce message', function () {
     $topicRegistry = (new TopicRegistry())
@@ -101,7 +102,7 @@ it('can produce message', function () {
         $producerMessageRepository
     );
 
-    $producerStream->process();
+    $producerStream->process(once: true);
 
     expect($producerMessageRepository->outboxProducerMessages)
         ->toBeEmpty()

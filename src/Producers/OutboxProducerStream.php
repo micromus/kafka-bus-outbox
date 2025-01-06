@@ -7,7 +7,6 @@ use Micromus\KafkaBusOutbox\Interfaces\ProducerMessageRepositoryInterface;
 use Micromus\KafkaBusOutbox\Interfaces\Producers\OutboxProducerInterface;
 use Micromus\KafkaBusOutbox\Interfaces\Producers\OutboxProducerStreamInterface;
 use Micromus\KafkaBusOutbox\Producers\Result\ErrorOutboxProducerResult;
-use Micromus\KafkaBusOutbox\Testing\Exceptions\OutboxProducerMessagesEndedException;
 
 final class OutboxProducerStream implements OutboxProducerStreamInterface
 {
@@ -26,24 +25,20 @@ final class OutboxProducerStream implements OutboxProducerStreamInterface
         $this->forceStop = true;
     }
 
-    public function process(): void
+    public function process(bool $once = false): void
     {
-        try {
-            do {
-                $messages = $this->getProducerMessages();
+        do {
+            $messages = $this->getProducerMessages();
 
-                if (count($messages) === 0) {
-                    sleep($this->timeToSleep);
+            if (count($messages) === 0) {
+                sleep($this->timeToSleep);
 
-                    continue;
-                }
-
-                $this->publishProducerMessages($messages);
+                continue;
             }
-            while (!$this->forceStop);
+
+            $this->publishProducerMessages($messages);
         }
-        catch (OutboxProducerMessagesEndedException) {
-        }
+        while (!$this->forceStop && !$once);
     }
 
     private function getProducerMessages(): array

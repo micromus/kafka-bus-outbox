@@ -7,11 +7,12 @@ use Micromus\KafkaBusOutbox\Exceptions\CannotPublishMessageForTopicException;
 interface OutboxProducerStreamInterface
 {
     /**
+     * @param bool $once
      * @return void
      *
      * @throws CannotPublishMessageForTopicException
      */
-    public function process(): void;
+    public function process(bool $once = false): void;
 
     public function forceStop(): void;
 }

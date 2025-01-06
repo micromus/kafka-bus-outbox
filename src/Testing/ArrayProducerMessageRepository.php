@@ -21,18 +21,10 @@ final class ArrayProducerMessageRepository implements ProducerMessageRepositoryI
     /**
      * @param int $limit
      * @return DeferredOutboxProducerMessage[]
-     *
-     * @throws OutboxProducerMessagesEndedException
      */
     public function get(int $limit = 100): array
     {
-        $messages = array_slice($this->outboxProducerMessages, 0, $limit);
-
-        if (count($messages) == 0) {
-            throw new OutboxProducerMessagesEndedException();
-        }
-
-        return $messages;
+        return array_slice($this->outboxProducerMessages, 0, $limit);
     }
 
     public function save(array $messages): void
