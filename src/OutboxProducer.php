@@ -12,7 +12,7 @@ final class OutboxProducer implements ProducerInterface
     ) {
     }
 
-    public function produce(array $messages): void
+    public function produce(iterable $messages): void
     {
         $this->producerMessageSaver->save($messages);
     }

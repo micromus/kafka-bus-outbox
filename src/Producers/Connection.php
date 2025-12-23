@@ -4,7 +4,8 @@ namespace Micromus\KafkaBusOutbox\Producers;
 
 use Micromus\KafkaBus\Interfaces\Connections\ConnectionInterface;
 use Micromus\KafkaBus\Interfaces\Producers\ProducerInterface;
-use Micromus\KafkaBus\Producers\Configuration;
+use Micromus\KafkaBus\Producers\ProducerConfig;
+use Micromus\KafkaBus\Topics\Topic;
 
 final class Connection
 {
@@ -15,12 +16,13 @@ final class Connection
     ) {
     }
 
-    public function getOrCreateProducer(string $topicName, array $options = []): ProducerInterface
+    public function getOrCreateProducer(Topic $topic, array $options = []): ProducerInterface
     {
-        if (!isset($this->producers[$topicName])) {
-            $this->producers[$topicName] = $this->connection->createProducer($topicName, new Configuration($options));
+        if (!isset($this->producers[$topic->key])) {
+            $this->producers[$topic->key] = $this->connection
+                ->createProducer($topic, new ProducerConfig($options));
         }
 
-        return $this->producers[$topicName];
+        return $this->producers[$topic->key];
     }
 }

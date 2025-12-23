@@ -5,7 +5,6 @@ namespace Micromus\KafkaBusOutbox\Testing;
 use Micromus\KafkaBusOutbox\Interfaces\ProducerMessageRepositoryInterface;
 use Micromus\KafkaBusOutbox\Messages\DeferredOutboxProducerMessage;
 use Micromus\KafkaBusOutbox\Messages\OutboxProducerMessage;
-use Micromus\KafkaBusOutbox\Testing\Exceptions\OutboxProducerMessagesEndedException;
 
 final class ArrayProducerMessageRepository implements ProducerMessageRepositoryInterface
 {
